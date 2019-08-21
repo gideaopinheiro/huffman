@@ -261,7 +261,18 @@ int compressFile(char* name_file)
 
 int main(int argc, char **argv)
 {
-    compressFile(argv[1]);
+
+	for (int i=0; i<argc; i++){
+		if(strcmp("-c", argv[i])==0){
+			compressFile(argv[i+1]);
+			return 0;
+		}
+		if(strcmp("-d", argv[i])){
+			/*TODO: decompressFile() FUNCTION
+			decompressFile();
+			*/
+		}
+	}
 
 	return 0;
 }

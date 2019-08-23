@@ -1,186 +1,169 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+typedef unsigned char BYTE;
 
-typedef struct NODE
-{
-	void  *item;
-  	char   binary[10];
-	int    frequency;
-	struct NODE *left;
-	struct NODE *right;
-}NODE;
-
-typedef struct HEAP
-{
-	void *data;
-	int   size;
-	int   MAX_SIZE;
-}HEAP;
-
+//###################
+// STRUCT NODE 
 typedef struct TREE
 {
-	NODE *root;
+	int frequency;
+	void *item;
+	struct TREE *next;
+	struct TREE *right;
+	struct TREE *left;
 }TREE;
 
-void swap(void *a, void *b, size_t size)
+typedef struct ELEMENT
 {
-	void *aux = malloc(size);
+    int frequency;
+    BYTE binary[20];
+}ELEMENT;
 
-	memcpy(aux, a, size);
-	memcpy(a, b, size);
-	memcpy(b, aux, size);
+typedef struct HASH
+{
+    ELEMENT *array[256];
+}HASH;
+
+// STRUCT PRIORITY QUEUE
+typedef struct PQ
+{
+	TREE *head;
+}PQ;
+//##################
+
+// THIS FUNCTION CREAT A NODE
+TREE *creat_node(BYTE element, int frequency)
+{
+	BYTE *item_aux = (BYTE*) malloc(sizeof(BYTE));
+	*item_aux = element;
+
+	TREE *new_node = malloc(sizeof(TREE));
+	new_node->frequency = frequency;
+
+	new_node->next = NULL;
+	new_node->left = NULL;
+	new_node->right = NULL;
+	new_node->item = item_aux;
+
+	return new_node;
 }
 
-NODE * create_node(unsigned char *character)
-{
-	NODE *newNode    = malloc(sizeof(NODE));
-	unsigned char *c = calloc(1, 2);
-
-	memcpy(c, character, 2);
-    newNode->binary[0] = '\0';
-	newNode->item      = c;
-	newNode->frequency = 0;
-	newNode->left      = NULL;
-	newNode->right     = NULL;
-
-	return newNode;
+// THIS FUNCTION RETURN THE ITEM OF THE NODE
+BYTE get_node_item(TREE *node){
+	BYTE *item = (BYTE*) node->item;
+	return *item;
 }
 
-HEAP * create_heap(int MAX_SIZE)
+PQ *creat_queue()
 {
-	HEAP *newHeap     = malloc(sizeof(HEAP));
-	newHeap->size     = 0;
-	newHeap->MAX_SIZE = MAX_SIZE;
-	NODE **data       = malloc(sizeof(NODE**) * MAX_SIZE);
-
-	for (int i = 0; i < MAX_SIZE; i++)
-		data[i] = NULL;
-
-	newHeap->data = data;
-
-	return newHeap;
+	PQ *new_queue = malloc(sizeof(PQ));
+	new_queue->head = NULL;
+	return new_queue;
 }
 
-int parentIndex(int i)     {return ((i + 1) >> 1) - 1;}
-int leftChildIndex(int i)  {return ((i + 1) << 1) - 1;}
-int rightChildIndex(int i) {return (i + 1) << 1;}
-
-void enqueue(HEAP *heap, NODE *data)
+//THIS FUNCTION COUNT A BYTE FRENQUENCY
+void count_frequency(FILE *file, HASH *hash)
 {
-	if (heap->size < heap->MAX_SIZE)
+	BYTE element;
+	//fseek(file, 0, SEEK_END);
+	while(fscanf(file,"%c", &element) != EOF)
 	{
-		int i, parent;
+		hash->array[element]->frequency++;
+	}
+}
 
-		i = heap->size;
-		heap->size++;
-		NODE **d = heap->data;
-		d[i] = data;
-		parent = parentIndex(i);
+//THIS FUNCTION DEQUEUE A NODE
+TREE *dequeue(PQ *queue)
+{
+	TREE *aux = queue->head;
+	queue->head = aux->next;
+	return aux;
+}
 
-		while (i != 0 && d[i]->frequency <= d[parent]->frequency)
+//THIS FUNCTION ENQUEUE A NODE
+void enqueue(PQ *queue, TREE *node)
+{
+	if(queue->head == NULL){
+		queue->head = node;
+	}else{
+		TREE *current = queue->head;
+		if (current->frequency > node->frequency)
 		{
-			swap(d[i], d[parent], sizeof(NODE));
-
-			i = parent;
-			parent = parentIndex(i);
+			node->next = queue->head;
+			queue->head = node;
+			return;
 		}
-		heap->data = d;
-	}
-}
-
-void mount_heap(HEAP *heap, NODE **data, int size)
-{
-	for (int i = 0, j = 0;j < size;i++)
-	{
-		if (data[i] != NULL)
+		while((current->next != NULL) && (current->next->frequency < node->frequency))
 		{
-			enqueue(heap, data[i]);
-			j++;
+			current = current->next;
 		}
+		node->next = current->next;
+		current->next = node;
 	}
 }
 
-void min_heapify(HEAP *heap, int i)
+//THIS FUNCTION ENQUEUE ALL ARRAY ELEMENTS
+void enqueue_array(PQ *queue, HASH* hash)
 {
-	int l, r;
-
-	l = leftChildIndex(i);
-	r = rightChildIndex(i);
-
-	NODE **d = heap->data;
-
-	if (l < heap->size && d[l]->frequency <= d[i]->frequency)
+	for(int i = 0; i < 256; i++)
 	{
-		swap(d[i], d[l], sizeof(NODE));
-		heap->data = d;
-		min_heapify(heap, l);
+        if (hash->array[i]->frequency > 0)
+        {
+		    TREE *aux = creat_node(i, hash->array[i]->frequency);
+		    enqueue(queue, aux);
+        }
 	}
-	if (r < heap->size && d[r]->frequency <= d[i]->frequency)
+}
+
+// THIS FUNCTION CREAT A HUFFMAN TREE
+TREE *creat_huffman_tree(PQ *queue)
+{
+	TREE *h = queue->head;
+	while(h->next != NULL)
 	{
-		swap(d[i], d[r], sizeof(NODE));
-		heap->data = d;
-		min_heapify(heap, r);
+		TREE *l = dequeue(queue);
+		TREE *r = dequeue(queue);
+
+		TREE *new_node = creat_node('*',l->frequency + r->frequency);
+
+		new_node->left = l;
+		new_node->right = r;
+
+		enqueue(queue, new_node);
+		h = queue->head;
 	}
+	return h;
 }
 
-NODE * dequeue(HEAP *heap)
+HASH* create_hash()
 {
-	NODE **d = heap->data;
-	NODE *x = d[0];
-
-	heap->size--;
-	d[0] = d[heap->size];
-
-	heap->data = d;
-	min_heapify(heap, 0);
-	return x;
+    HASH* hash = (HASH*) malloc(sizeof(HASH));
+    
+    for (int i = 0; i < 256; i++)
+    {
+        hash->array[i] = (ELEMENT*) malloc(sizeof(ELEMENT));
+        
+        hash->array[i]->frequency = 0;
+        hash->array[i]->binary[0] = '\0';
+    }
+    return hash;
 }
 
-NODE * create_tree(HEAP *heap)
-{
-	NODE *n1, *n2, *newNode;
-	unsigned char c = '*';
-
-	while(heap->size > 1)
-	{
-		n1 = dequeue(heap);
-		n2 = dequeue(heap);
-
-		newNode = create_node(&c);
-		newNode->frequency = n1->frequency + n2->frequency;
-		newNode->left = n1;
-		newNode->right = n2;
-
-		enqueue(heap, newNode);
-	}
-	return dequeue(heap);
-}
-
-void print_preorder(NODE *node)
-{
-	if (node != NULL) return;
-
-	printf("%s\n", node->binary);
-
-	print_preorder(node->left);
-	print_preorder(node->right);
-}
-
-void loop(NODE *node, NODE** data, char *string)
+// THIS FUNCTION BINARY READ
+void binary_read(TREE *node, HASH* hash, char *string)
 {
 	if (node != NULL)
     {
-        unsigned char *aux = (unsigned char*) node->item;
+        BYTE *aux = (BYTE*) node->item;
         if (*aux == '*')
-        {
-            
-            loop(node->left,  data, strcat(string, "0"));
+        { 
+            binary_read(node->left,  hash, strcat(string, "0"));
 
             int size = strlen(string);
             string[size - 1] = '\0';
 
-            loop(node->right, data, strcat(string, "1"));
+            binary_read(node->right, hash, strcat(string, "1"));
 
             size = strlen(string);
             string[size - 1] = '\0';
@@ -188,91 +171,156 @@ void loop(NODE *node, NODE** data, char *string)
         else
         {
             printf("%c : %s\n",*aux, string);
-            if (*aux == '\\')
-                strcat(data[aux[1]]->binary, string);
-            else
-                strcat(data[*aux]->binary , string); 
+            strcat(hash->array[*aux]->binary, string); 
         }  
     }
 }
 
-int read_file(FILE *file, unsigned char *buffer, NODE **data)
+// THIS FUNCTION PRINT A TREE IN PRE ORDER
+void get_tree(TREE *huff, char string[])
 {
-	unsigned char character;
-	int nChar = 0;
-
-	for (int i = 0;fscanf(file, "%c", &character) != EOF;i++)
+	if (huff != NULL)
 	{
-		buffer[i] = character;
+        BYTE aux[2];
+        aux[0] = get_node_item(huff);
+        aux[1] = '\0';
 
-		if (data[character] == NULL)
+        if (huff->left == NULL)
+        {
+            if (aux[0] == '*')
+                strcat(string, "\\*");
+
+            else if (aux[0] == '\\')
+                strcat(string, "\\\\");
+            else
+            strcat(string, aux);
+        }
+        else
+            strcat(string, aux);
+
+		get_tree(huff->left, string);
+		get_tree(huff->right, string);
+	}
+}
+
+int is_bit_i_set(BYTE c, int i)
+{
+    BYTE mask = 1 << i;
+    return mask & c;
+}
+BYTE set_bit(BYTE c, int i)
+{
+    BYTE mask = 1 << i;
+    return mask | c;
+}
+
+int getTrashLength(HASH* hash)
+{
+    long int trash = 0;
+    for (int i = 0; i < 256; i++)
+    {
+        trash += strlen(hash->array[i]->binary) * hash->array[i]->frequency;
+    }
+    return (trash % 8);
+}
+
+void write_cabecario(FILE* output_file, HASH* hash, TREE* tree)
+{
+    int trash = getTrashLength(hash);
+    printf("trash: %d\n", trash);
+    BYTE binary[2] = {0};
+
+    binary[0] = trash << 5;
+    //todo pegar o bi da function
+    
+    char pre_order_tree[10000];
+    pre_order_tree[0] = '\0';
+
+    get_tree(tree, pre_order_tree);
+
+    int size_tree = strlen(pre_order_tree);
+
+    binary[0] |= size_tree >> 8;
+    binary[1] = size_tree;
+
+    fwrite(binary, 1, 2, output_file);
+
+    fwrite(pre_order_tree, 1, size_tree, output_file);
+
+    //todo get the bit da planta
+
+    //fwrite(, )
+}
+
+void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash)
+{
+	BYTE element;
+    BYTE new_byte = 0;
+	fseek(input_file, 0, SEEK_SET);
+    int i = 0;
+
+	while(fscanf(input_file,"%c", &element) != EOF)
+	{
+        int j = 0;
+        while(hash->array[element]->binary[i] != '\0')
+        {     
+            if(hash->array[element]->binary[j] == '1');
+                new_byte = set_bit(new_byte,7-j);
+            j++;
+        }
+        printf("%d ", new_byte);
+	}
+    printf("\n");
+}
+
+void write_file(TREE* tree, HASH* hash,FILE *input_file)
+{
+    FILE* output_file;
+    char output_file_name[1000];
+
+    scanf("%s", output_file_name);
+    strcat(output_file_name, ".huff");
+
+    output_file = fopen(output_file_name, "wb");
+
+    write_cabecario(output_file, hash, tree);
+
+    write_new_binary(input_file,output_file,hash);
+}
+
+int main(void)
+{
+	FILE *input_file;
+	PQ *queue = creat_queue();
+	TREE *huffman_tree = NULL;
+
+	while(1)
+	{
+		printf("ENTRE COM O NOME DO ARQUIVO PARA COMPACTAR\n==> ");
+		char input_file_name[256];
+		scanf("%s", input_file_name);
+
+		input_file = fopen(input_file_name, "rb");
+		fseek(input_file, 0, SEEK_SET);
+
+		if (input_file == NULL)
 		{
-			if (character == '*' || character == '\\')
-			{
-				unsigned char c[2] = {'\\', character};
-				data[character]    = create_node(c);
-			}
-			else
-				data[character] = create_node(&character);
-			nChar++;
-		}
-		data[character]->frequency++;
+			printf("ALGO DEU ERRADO =(\n");
+		}else break;
 	}
-	return nChar;
-}
+    char string_binary[256];
+    string_binary[0] = '\0';
+	HASH* hash = create_hash();
 
-int compressFile(char* name_file)
-{
-    NODE         **data;
-    long long int  sizeFile;
-	unsigned char *buffer;
-	int            maxHeapSize;
+	count_frequency(input_file, hash);
 
-	FILE *file = fopen(name_file, "rb");
+	enqueue_array(queue, hash);
 
-	fseek(file, 0, SEEK_END);
-	sizeFile = ftell(file);
-	rewind(file);
+	huffman_tree = creat_huffman_tree(queue);
 
-	buffer = malloc(sizeFile);
-	data   = malloc(sizeof(NODE) * 256);
+    binary_read(huffman_tree, hash, string_binary);
 
-	for (int i = 0;i < 256;i++)
-		data[i] = NULL;
+	//print_pre_order(huffman_tree)
 
-	maxHeapSize = read_file(file, buffer, data);
-	fclose(file);
-
-    // heap
-	HEAP *heap = create_heap(256);
-	mount_heap(heap, data, maxHeapSize);
-
-    // tree
-	TREE *tree = malloc(sizeof(TREE));
-	tree->root = create_tree(heap);
-
-    //print_preorder(tree->root);
-	// printf("\n");
-
-    char aux_string[10];
-    aux_string[0] = '\0';
-    loop(tree->root, data, aux_string);
-}
-
-int main(int argc, char **argv)
-{
-
-	for (int i=0; i<argc; i++){
-		if(strcmp("-c", argv[i])==0){
-			compressFile(argv[i+1]);
-			return 0;
-		}
-		if(strcmp("-d", argv[i])){
-			/*TODO: decompressFile() FUNCTION
-			decompressFile();
-			*/
-		}
-	}
-
-	return 0;
+    write_file(huffman_tree, hash, input_file);
 }

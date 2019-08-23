@@ -187,7 +187,7 @@ void loop(NODE *node, NODE** data, char *string)
         }
         else
         {
-            printf("aqui : %s\n", string);
+            printf("%c : %s\n",*aux, string);
             if (*aux == '\\')
                 strcat(data[aux[1]]->binary, string);
             else
@@ -238,7 +238,7 @@ int compressFile(char* name_file)
 	data   = malloc(sizeof(NODE) * 256);
 
 	for (int i = 0;i < 256;i++)
-		data[1] = NULL;
+		data[i] = NULL;
 
 	maxHeapSize = read_file(file, buffer, data);
 	fclose(file);

@@ -271,26 +271,20 @@ void get_tree(TREE *huff, BYTE string[])
 	}
 }
 
-//ISSO EH UMA GANBIARRA SAFADA PRA PEGAR O TAMANHO DA ARVORE, DEPOIS VOCES CONSERTA PORQUE EU TO COM SONO. ass.: JEZZUZ
-void get_tree_size(TREE *huff, BYTE *string)
+// Arrumado
+int get_tree_size(TREE *huff)
 {
-	if (huff != NULL)
+	if (huff == NULL)
 	{
-        BYTE aux;
-        aux = get_node_item(huff);
-
-        if (huff->left == NULL)
-        {
-            if (aux == '*' || aux == '\\')
-                strcat(string, "11");
-            else
-            	strcat(string, "1");
-        }
-        else
-            strcat(string, "1");
-
-		get_tree_size(huff->left, string);
-		get_tree_size(huff->right, string);
+		return 0;
+	}
+	else
+	{
+		if (huff->left == NULL &&(get_node_item(huff) == '*' || get_node_item(huff) == '\\'))
+		{
+			return 2;
+		}
+		return 1 + get_tree_size(huff->left) + get_tree_size(huff->right);
 	}
 }
 
@@ -312,10 +306,10 @@ int getTrashLength(HASH* hash)
     {
         trash += strlen(hash->array[i]->binary) * hash->array[i]->frequency;
     }
-    return (trash % 8);
+    return 8 - (trash % 8);
 }
 
-int write_header(FILE* output_file, HASH* hash, TREE* tree)
+void write_header(FILE* output_file, HASH* hash, TREE* tree)
 {
     int trash = getTrashLength(hash);
     printf("trash: %d\n", trash);
@@ -324,14 +318,11 @@ int write_header(FILE* output_file, HASH* hash, TREE* tree)
     binary[0] = trash << 5;
     
     BYTE pre_order_tree[10000];
-    BYTE *string = malloc(10000);
     pre_order_tree[0] = '\0';
-    string[0] = '\0';
 
     get_tree(tree, pre_order_tree);
-    get_tree_size(tree, string);
-
-    int size_tree = strlen(string);
+    
+    int size_tree = get_tree_size(tree);
 
     printf("tree: %d\n", size_tree);
 
@@ -341,12 +332,9 @@ int write_header(FILE* output_file, HASH* hash, TREE* tree)
     fwrite(binary, 1, 2, output_file);
 
     fwrite(pre_order_tree, 1, size_tree, output_file);
-
-	return trash;
-    //fwrite(, )
 }
 
-void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash, int trash)
+void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash)
 {
 	BYTE element;
     BYTE new_byte = 0;
@@ -361,7 +349,6 @@ void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash, int trash
 		   if(bit < 0)
 		   {
 			   fprintf(output_file,"%c",new_byte);
-			   printf("aqui\n");
 			   new_byte = 0;
 			   bit = 7;
 		   }
@@ -372,25 +359,19 @@ void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash, int trash
 		   bit--;
 	   }
 	}
-	new_byte = new_byte >> trash;
-    //set_bit(new_byte, trah);
 	fprintf(output_file,"%c",new_byte);
 }
 
-void write_file(TREE* tree, HASH* hash,FILE *input_file)
+void write_file(TREE* tree, HASH* hash, FILE *input_file, char input_file_name[])
 {
     FILE* output_file;
-    char output_file_name[1000];
+    strcat(input_file_name, ".huff");
 
-	printf("entre com o nome do arquivo de saida\n===> ");
-    scanf("%s", output_file_name);
-    strcat(output_file_name, ".huff");
+    output_file = fopen(input_file_name, "wb");
 
-    output_file = fopen(output_file_name, "wb");
+    write_header(output_file, hash, tree);
 
-    int len_trash = write_header(output_file, hash, tree);
-
-    write_new_binary(input_file,output_file,hash, len_trash);
+    write_new_binary(input_file,output_file,hash);
 }
 
 int main(void)
@@ -399,10 +380,10 @@ int main(void)
 	HEAP *heap = create_heap();
 	TREE *huffman_tree = NULL;
 
+	char input_file_name[256];
 	while(1)
 	{
 		printf("ENTRE COM O NOME DO ARQUIVO PARA COMPACTAR\n==> ");
-		char input_file_name[256];
 		scanf("%s", input_file_name);
 
 		input_file = fopen(input_file_name, "rb");
@@ -425,5 +406,5 @@ int main(void)
 
     binary_read(huffman_tree, hash, string_binary);
 
-    write_file(huffman_tree, hash, input_file);
+    write_file(huffman_tree, hash, input_file, input_file_name);
 }

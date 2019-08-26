@@ -315,7 +315,7 @@ int getTrashLength(HASH* hash)
     return (trash % 8);
 }
 
-void write_header(FILE* output_file, HASH* hash, TREE* tree)
+int write_header(FILE* output_file, HASH* hash, TREE* tree)
 {
     int trash = getTrashLength(hash);
     printf("trash: %d\n", trash);
@@ -342,44 +342,55 @@ void write_header(FILE* output_file, HASH* hash, TREE* tree)
 
     fwrite(pre_order_tree, 1, size_tree, output_file);
 
-
+	return trash;
     //fwrite(, )
 }
 
-// void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash)
-// {
-// 	BYTE element;
-//     BYTE new_byte = 0;
-// 	fseek(input_file, 0, SEEK_SET);
-//     int i = 0;
+void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash, int trash)
+{
+	BYTE element;
+    BYTE new_byte = 0;
+	int bit = 7;
 
-// 	while(fscanf(input_file,"%c", &element) != EOF)
-// 	{
-//         int j = 0;
-//         while(hash->array[element]->binary[i] != '\0')
-//         {     
-//             if(hash->array[element]->binary[j] == '1');
-//                 new_byte = set_bit(new_byte,7-j);
-//             j++;
-//         }
-//         printf("%d ", new_byte);
-// 	}
-//     printf("\n");
-// }
+	fseek(input_file, 0, SEEK_SET);
+
+	while(fscanf(input_file,"%c", &element) != EOF)
+	{
+       for(int i = 0; hash->array[element]->binary[i] != '\0'; i++)
+	   {
+		   if(bit < 0)
+		   {
+			   fprintf(output_file,"%c",new_byte);
+			   printf("aqui\n");
+			   new_byte = 0;
+			   bit = 7;
+		   }
+		   if(hash->array[element]->binary[i] == '1')
+		   {
+			   new_byte = set_bit(new_byte,bit);
+		   }
+		   bit--;
+	   }
+	}
+	new_byte = new_byte >> trash;
+    //set_bit(new_byte, trah);
+	fprintf(output_file,"%c",new_byte);
+}
 
 void write_file(TREE* tree, HASH* hash,FILE *input_file)
 {
     FILE* output_file;
     char output_file_name[1000];
 
+	printf("entre com o nome do arquivo de saida\n===> ");
     scanf("%s", output_file_name);
     strcat(output_file_name, ".huff");
 
     output_file = fopen(output_file_name, "wb");
 
-    write_header(output_file, hash, tree);
+    int len_trash = write_header(output_file, hash, tree);
 
-    //write_new_binary(input_file,output_file,hash);
+    write_new_binary(input_file,output_file,hash, len_trash);
 }
 
 int main(void)

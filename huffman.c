@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define True 1
+#define False 0
+
 //###################
 typedef unsigned char BYTE;
 
@@ -372,29 +375,15 @@ void write_file(TREE* tree, HASH* hash, FILE *input_file, char input_file_name[]
     write_header(output_file, hash, tree);
 
     write_new_binary(input_file,output_file,hash);
+
+	fclose(output_file);
 }
 
-int main(void)
-{
-	FILE *input_file;
+void compress_file(FILE *input_file, char *file_name){
 	HEAP *heap = create_heap();
 	TREE *huffman_tree = NULL;
 
-	char input_file_name[256];
-	while(1)
-	{
-		printf("ENTRE COM O NOME DO ARQUIVO PARA COMPACTAR\n==> ");
-		scanf("%s", input_file_name);
-
-		input_file = fopen(input_file_name, "rb");
-		fseek(input_file, 0, SEEK_SET);
-
-		if (input_file == NULL)
-		{
-			printf("ALGO DEU ERRADO =(\n");
-		}else break;
-	}
-    char string_binary[256];
+	char string_binary[256];
     string_binary[0] = '\0';
 	HASH* hash = create_hash();
 
@@ -406,5 +395,28 @@ int main(void)
 
     binary_read(huffman_tree, hash, string_binary);
 
-    write_file(huffman_tree, hash, input_file, input_file_name);
+    write_file(huffman_tree, hash, input_file, file_name);
+}
+
+int main(int argc, char *argv[])
+{
+	FILE *input_file;
+	
+	while(True){
+		if(strcmp(argv[1], "-c")==0){
+			input_file = fopen(argv[2], "rb");
+			fseek(input_file, 0, SEEK_SET);
+
+			if (input_file == NULL){
+				printf("ALGO DEU ERRADO =(\n");
+			}else{
+				compress_file(input_file, argv[2]);
+				fclose(input_file);
+				printf("Done!\n");
+				break;
+			}
+		}
+		//TODO DECOMPRESS FUNCTION.
+	}
+    
 }

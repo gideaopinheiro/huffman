@@ -1,3 +1,6 @@
+#ifndef  ADT_HUFFMAN_H
+#define  ADT_HUFFMAN_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,3 +31,5 @@ typedef struct HASH
 {
     ELEMENT *array[256];
 }HASH;
+
+#endif

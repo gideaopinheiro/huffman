@@ -268,7 +268,7 @@ int getTrashLength(HASH* hash)
     {
         trash += strlen(hash->array[i]->binary) * hash->array[i]->frequency;
     }
-    return 8 - (trash % 8);
+    return (8 - (trash % 8)) % 8;
 }
 
 void write_header(FILE* output_file, HASH* hash, TREE* tree)

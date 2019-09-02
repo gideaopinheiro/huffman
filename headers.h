@@ -1,3 +1,6 @@
+#ifndef  HEADERS_H
+#define  HEADERS_H
+
 #include "adt_huffman.h"
 
 TREE *create_node(BYTE element, int frequency);
@@ -50,3 +53,4 @@ int *getHeader(FILE *input_file);
 
 void decompress_file(FILE *input_file);
 
+#endif

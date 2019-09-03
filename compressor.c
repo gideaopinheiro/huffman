@@ -57,7 +57,7 @@ void enqueue(HEAP *heap, TREE *node)
 	auxData[i] = node;
 	p = parentIndex(i);
 
-	while (i != 0 && auxData[i]->frequency <= auxData[p]->frequency)
+	while ((i != 0) && (auxData[i]->frequency <= auxData[p]->frequency))
 	{
 		TREE *aux;
 
@@ -81,7 +81,7 @@ void min_heapify(HEAP *heap, int i)
 
 	TREE **auxData = heap->data;
 
-	if (l < heap->size && auxData[l]->frequency <= auxData[i]->frequency)
+	if ((l < heap->size) && (auxData[l]->frequency <= auxData[i]->frequency))
 	{
 		TREE *aux;
 
@@ -92,7 +92,7 @@ void min_heapify(HEAP *heap, int i)
 		heap->data = auxData;
 		min_heapify(heap, l);
 	}
-	if (r < heap->size && auxData[r]->frequency <= auxData[i]->frequency)
+	if ((r < heap->size) && (auxData[r]->frequency <= auxData[i]->frequency))
 	{
 		TREE *aux;
 
@@ -207,7 +207,7 @@ void binary_read(TREE *node, HASH* hash, char *string)
 }
 
 // THIS FUNCTION SAVES THE TREE IN PRE-ORDER ON A STRING
-void get_tree(TREE *huff, BYTE string[])
+void get_tree(TREE *huff, BYTE string[], int *len)
 {
 	if (huff != NULL)
 	{
@@ -215,22 +215,32 @@ void get_tree(TREE *huff, BYTE string[])
         aux[0] = get_node_item(huff);
         aux[1] = '\0';
 
-        if (huff->left == NULL)
-        {
-            if (aux[0] == '*')
-                strcat(string, "\\*");
-
-            else if (aux[0] == '\\')
-                strcat(string, "\\\\");
-            else
-            	strcat(string, aux);
-        }
-        else
-            strcat(string, aux);
-
-		get_tree(huff->left, string);
-		get_tree(huff->right, string);
+		if(huff->left == NULL){
+			if(aux[0] == '*'){
+				string[*len] = '\\';
+				*len += 1;
+				string[*len] = '*';
+				*len += 1;
+			}
+			else if(aux[0] == '\\'){
+				string[*len] = '\\';
+				*len+=1;
+				string[*len] = '\\';
+				*len+=1;
+			}
+			else{
+				string[*len] = aux[0];
+				*len += 1;
+			}
+		}
+		else{
+			string[*len] = aux[0];
+			*len += 1;
+			get_tree(huff->left, string, len);
+			get_tree(huff->right, string, len);
+		}
 	}
+
 }
 
 // Arrumado
@@ -279,20 +289,20 @@ void write_header(FILE* output_file, HASH* hash, TREE* tree)
     
     
     BYTE pre_order_tree[10000];
-    pre_order_tree[0] = '\0';
+   // pre_order_tree[0] = '\0';
+	int length = 0;
+    get_tree(tree, pre_order_tree, &length);
+    printf("****** %d ******\n", length);
+    //int size_tree = get_tree_size(tree);
 
-    get_tree(tree, pre_order_tree);
-    
-    int size_tree = get_tree_size(tree);
+   // printf("tree: %d\n", size_tree);
 
-    printf("tree: %d\n", size_tree);
-
-    binary[0] = trash_size << 5 | size_tree >> 8;
-    binary[1] = size_tree;
+    binary[0] = trash_size << 5 | length >> 8;
+    binary[1] = length;
 
     fwrite(binary, 1, 2, output_file);
 
-    fwrite(pre_order_tree, 1, size_tree, output_file);
+    fwrite(pre_order_tree, 1, length, output_file);
 }
 
 void write_new_binary(FILE *input_file,FILE *output_file , HASH *hash)

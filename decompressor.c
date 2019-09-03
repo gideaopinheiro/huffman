@@ -19,12 +19,14 @@ int *getHeader(FILE *input_file)
 	header[1] = tree_size;
 	
 	return (header);
-
 }
+
+char *getTree()
 
 void decompress_file(FILE *input_file)
 {
 	int *info = getHeader(input_file);
+	int *char = getTree(input_file, );
 	printf("%d: %d\n", info[0], info[1]);
 	return;
 }

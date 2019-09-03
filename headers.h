@@ -31,7 +31,7 @@ HASH* create_hash();
 
 void binary_read(TREE *node, HASH* hash, char *string);
 
-void get_tree(TREE *huff, BYTE string[]);
+void get_tree(TREE *huff, BYTE string[], int *len);
 
 int get_tree_size(TREE *huff);
 

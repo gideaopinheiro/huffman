@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
 	FILE *input_file;
-
+ 
 	while(True){
 		if(strcmp(argv[1], "-c")==0){
 			

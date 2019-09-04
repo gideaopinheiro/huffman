@@ -24,28 +24,27 @@ int *getHeader(FILE *input_file)
 char *getTree(FILE *input_file, int len_tree){
 	BYTE *tree = malloc(len_tree);
 	fseek(input_file, 2, SEEK_SET);
+
 	for(int i=0; i < len_tree; i++){
 		fscanf(input_file, "%c", &tree[i]);
-		printf("%c", tree[i]);
 	}
-	printf("\n");
 	return (tree);	
 }
 
 TREE *buildTree(BYTE *tree, int *i){
 	TREE *new_node;
-	//new_node = malloc(sizeof(TREE));
-	
+
 	if(tree[*i] != '*'){
-		if(tree[*i] == '\\') *i += 1; 
+		if(tree[*i] == '\\') *i ++; 
 		new_node = create_node(tree[*i], 0);
-		*i += 1;
+		*i ++;
 
 		return new_node;
 	}
+	
 	new_node = create_node(tree[*i], 0);
 	
-	*i += 1;
+	*i ++;
 	new_node->left = buildTree(tree, i);
 	new_node->right = buildTree(tree, i);
 	
@@ -62,13 +61,18 @@ void print_pre_order(TREE *tree){
 }
 
 
+
 void decompress_file(FILE *input_file)
 {
 	int *info_header = getHeader(input_file);
 	BYTE *string_tree = getTree(input_file, info_header[1]);
-	printf("\n\n\n\n");
-	TREE *tree = buildTree(string_tree, 0);
+
+	int i =0;
+	TREE *tree = buildTree(string_tree, &i);
+
+	FILE *output_file = fopen("descompressed", "wb");
+
 	print_pre_order(tree);
-	printf("\n");
+
 	return;
 }

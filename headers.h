@@ -1,7 +1,14 @@
 #ifndef  HEADERS_H
 #define  HEADERS_H
 
+#define True 1
+#define False 0
+
 #include "adt_huffman.h"
+
+BYTE mount_char(BYTE binary[]);
+
+void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[]);
 
 TREE *create_node(BYTE element, int frequency);
 

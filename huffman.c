@@ -1,10 +1,6 @@
 #include "compressor.c"
 #include "decompressor.c"
 
-#define True 1
-#define False 0
-
-
 int main(int argc, char *argv[])
 {
 	FILE *input_file;

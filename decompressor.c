@@ -81,45 +81,66 @@ int len_file(FILE *file){
 	return len;
 }
 
-void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[])
+void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[], int trash_size)
 {
 	FILE *output_file = fopen(output_file_name, "wb");
-	BYTE *elemet;
-	fseek(input_file, 0, SEEK_SET);
-	int *position = getHeader(input_file);
-
-	fseek(input_file, (2+position[1]), SEEK_SET);
-	printf("size tree = %d\n",position[1] );
+	BYTE elemet, elemet2;
 
 	TREE *root = tree;
-	short i = -1;
-
+	int i = -1;
+	fscanf(input_file, "%c", &elemet2);
 	while(True)
 	{
 		if(i < 0){
 			i = 7;
-			if(fscanf(input_file, "%c", &elemet) == EOF) break;
+			elemet = elemet2;
+			if(fscanf(input_file, "%c", &elemet2) == EOF) break;
 		}
 		
-		printf("%c == ", &elemet);
+		printf("%c == ", elemet);
 		while(root->left != NULL)
 		{
-			if (is_bit_i_set(*elemet,i))
+			if (is_bit_i_set(elemet,i))
 			{
-				//strcat(binary,"1");
 				root = root->right;
 			}
 			else
-			 {
-			 	//strcat(binary,"0");
+			{
 			 	root = root->left;
 			}
 			i--;
+			if (i < 0) break;
 		}
-		//contador ++;
-		printf("%c\n", get_node_item(root));
-		fprintf(output_file, "%c", get_node_item(root));
-		root = tree;
+		if (root->left == NULL)
+		{
+			printf("%c\n", get_node_item(root));
+			fprintf(output_file, "%c", get_node_item(root));
+			root = tree;
+		}
+	}
+	printf("\n\n\n\n%d     %d",trash_size,i);
+	while(i - trash_size  >= 0)
+	{
+		printf("aqui 2\n");
+		while(root->left != NULL)
+		{
+			if (is_bit_i_set(elemet,i))
+			{
+				root = root->right;
+			}
+			else
+			{
+			 	root = root->left;
+			}
+			i--;
+			if (i < 0) break;
+		}
+		//if (root->left == NULL)
+		//{
+			printf("%c\n", get_node_item(root));
+			fprintf(output_file, "%c", get_node_item(root));
+			root = tree;
+		//}
 	}
 
 	fclose(output_file);
@@ -143,7 +164,7 @@ void decompress_file(FILE *input_file)
 	printf("please enter with the output file name\n");
 	scanf(" %s", output_file_name);
 
-	write_decompress_binary(tree, input_file, output_file_name);
+	write_decompress_binary(tree, input_file, output_file_name, info_header[0]);
 	printf("saida\n");
 
 	return;

@@ -8,7 +8,7 @@
 
 BYTE mount_char(BYTE binary[]);
 
-void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[]);
+void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[], int trash_size);
 
 TREE *create_node(BYTE element, int frequency);
 

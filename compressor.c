@@ -265,7 +265,6 @@ int getTrashLength(HASH* hash)
 void write_header(FILE* output_file, HASH* hash, TREE* tree)
 {
     int trash_size = getTrashLength(hash);
-    printf("trash: %d\n", trash_size);
     BYTE binary[2] = {0};
     
     

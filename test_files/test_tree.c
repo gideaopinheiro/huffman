@@ -1,27 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "adt_huffman.h"
+#include "headers.h"
+
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include "../headers.h"
-
-void test_max(void){
-
-    CU_ASSERT(max(0, 2) == 2);
-    CU_ASSERT(max(5, 2) == 5);
-    CU_ASSERT(max(-2, 6) == 6);
-    CU_ASSERT(max(1, 1) == 1);
+void test_create_node(){
+    BYTE *letter = 'A';
+    int frequency = 7;
+    TREE *new_node  = create_node(letter, frequency);
+    CU_ASSERT_PTR_NOT_NULL(new_node);
 }
 
-void test_factorial(void){
-    CU_ASSERT(factorial(4) == 24);    
-    CU_ASSERT(factorial(3) == 6);    
-    CU_ASSERT(factorial(5) == 120);    
-    CU_ASSERT(factorial(2) == 2);    
-}
-
-void function(void){
+int main(){  
     CU_initialize_registry();
     CU_pSuite suite = NULL;
     
@@ -34,5 +27,5 @@ void function(void){
     CU_basic_run_tests();
     CU_cleanup_registry();
     
-    return;
+    return 0;
 }

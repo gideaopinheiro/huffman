@@ -270,12 +270,9 @@ void write_header(FILE* output_file, HASH* hash, TREE* tree)
     
     
     BYTE pre_order_tree[10000];
-   // pre_order_tree[0] = '\0';
+
 	int length = 0;
     get_tree(tree, pre_order_tree, &length);
-    printf("****** %d ******\n", length);
-
-   // printf("tree: %d\n", size_tree);
 
     binary[0] = trash_size << 5 | length >> 8;
     binary[1] = length;

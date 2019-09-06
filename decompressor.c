@@ -155,8 +155,6 @@ void decompress_file(FILE *input_file)
 	int i =0;
 	TREE *tree = buildTree(string_tree, &i);
 
-	//FILE *output_file = fopen("descompressed.txt", "wb");
-
 	print_pre_order(tree);
 	printf("\n");
 

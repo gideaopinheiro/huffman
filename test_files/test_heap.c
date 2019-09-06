@@ -1,17 +1,19 @@
-#include <stdio.h>
 #include <stdlib.h>
-
-#include "adt_huffman.h"
-#include "headers.h"
+#include <stdio.h>
 
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
+#include "../adt_huffman.h"
+#include "../headers.h"
+#include "../compressor.c"
+
 void test_create_node(){
-    BYTE *letter = 'A';
+    BYTE letter = 'A';
     int frequency = 7;
     TREE *new_node  = create_node(letter, frequency);
     CU_ASSERT_PTR_NOT_NULL(new_node);
+    CU_ASSERT_EQUAL('A', get_node_item(new_node));
 }
 
 int main(){  
@@ -21,7 +23,6 @@ int main(){
     suite = CU_add_suite("HUFFMAN TESTING", 0, 0);
 
     CU_add_test(suite, "TESTING_CREATE_NODE", test_create_node);
-    CU_add_test(suite, "TESTING_CREATE_HEAP", test_create_heap);
     
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();

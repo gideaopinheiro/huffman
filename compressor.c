@@ -3,7 +3,7 @@
 
 TREE *create_node(BYTE element, int frequency)
 {
-	BYTE *item_aux = (BYTE*) malloc(sizeof(BYTE));
+	BYTE *item_aux = malloc(sizeof(BYTE));
 	*item_aux = element;
 
 	TREE *new_node = malloc(sizeof(TREE));
@@ -149,6 +149,13 @@ TREE * create_huffman_tree(HEAP *heap)
 {
 	TREE *l, *r, *newNode;
 
+	if (heap->size == 1)
+	{
+		newNode = create_node('*', -1);
+		newNode->left = dequeue(heap);
+		return newNode;
+	}
+
 	while(heap->size > 1)
 	{
 		l = dequeue(heap);
@@ -167,11 +174,11 @@ TREE * create_huffman_tree(HEAP *heap)
 
 HASH* create_hash()
 {
-    HASH* hash = (HASH*) malloc(sizeof(HASH));
+    HASH* hash = malloc(sizeof(HASH));
     
     for (int i = 0; i < 256; i++)
     {
-        hash->array[i] = (ELEMENT*) malloc(sizeof(ELEMENT));
+        hash->array[i] = malloc(sizeof(ELEMENT));
         
         hash->array[i]->frequency = 0;
         hash->array[i]->binary[0] = '\0';
@@ -188,7 +195,7 @@ void binary_read(TREE *node, HASH* hash, char *string)
 
         if (node->left == NULL)
         {
-			printf("%c : %s\n",aux, string);
+			//printf("%c : %s\n",aux, string);
             strcat(hash->array[aux]->binary, string); 
         }
         else
@@ -211,53 +218,27 @@ void get_tree(TREE *huff, BYTE string[], int *len)
 {
 	if (huff != NULL)
 	{
-        BYTE aux[2];
-        aux[0] = get_node_item(huff);
-        aux[1] = '\0';
+        BYTE aux;
+        aux = get_node_item(huff);
 
 		if(huff->left == NULL){
-			if(aux[0] == '*'){
-				string[*len] = '\\';
-				*len += 1;
-				string[*len] = '*';
-				*len += 1;
-			}
-			else if(aux[0] == '\\'){
-				string[*len] = '\\';
-				*len+=1;
+
+			if(aux == '*'  || aux == '\\')
+			{
 				string[*len] = '\\';
 				*len+=1;
 			}
-			else{
-				string[*len] = aux[0];
-				*len += 1;
-			}
+			string[*len] = aux;
+			*len += 1;
 		}
 		else{
-			string[*len] = aux[0];
+			string[*len] = aux;
 			*len += 1;
 			get_tree(huff->left, string, len);
 			get_tree(huff->right, string, len);
 		}
 	}
 
-}
-
-// Arrumado
-int get_tree_size(TREE *huff)
-{
-	if (huff == NULL)
-	{
-		return 0;
-	}
-	else
-	{
-		if (huff->left == NULL &&(get_node_item(huff) == '*' || get_node_item(huff) == '\\'))
-		{
-			return 2;
-		}
-		return 1 + get_tree_size(huff->left) + get_tree_size(huff->right);
-	}
 }
 
 int is_bit_i_set(BYTE c, int i)
@@ -273,7 +254,7 @@ BYTE set_bit(BYTE c, int i)
 
 int getTrashLength(HASH* hash)
 {
-    long int trash = 0;
+    long long int trash = 0;
     for (int i = 0; i < 256; i++)
     {
         trash += strlen(hash->array[i]->binary) * hash->array[i]->frequency;
@@ -293,7 +274,6 @@ void write_header(FILE* output_file, HASH* hash, TREE* tree)
 	int length = 0;
     get_tree(tree, pre_order_tree, &length);
     printf("****** %d ******\n", length);
-    //int size_tree = get_tree_size(tree);
 
    // printf("tree: %d\n", size_tree);
 

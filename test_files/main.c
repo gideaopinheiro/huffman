@@ -19,7 +19,8 @@ void test_tree(){
     short frequency1 = 10;
 
     new_node->left = create_node(letter1, frequency1);
-    /*Here we expect the pointer to the right child to still be null and the left child to point to the last node created.*/
+    /*Here we expect the pointer to the right child to still
+     be null and the left child to point to the last node created.*/
     CU_ASSERT_PTR_NOT_NULL(new_node->left);
     CU_ASSERT_PTR_NULL(new_node->right);
     CU_ASSERT_EQUAL(frequency1, new_node->left->frequency);
@@ -40,25 +41,47 @@ void test_heap(){
     
     CU_ASSERT_EQUAL(0, new_heap->size);
     CU_ASSERT_PTR_NOT_NULL(new_heap);
-
-    BYTE letter = 'C';
-    short frequency = 4;
-    TREE *new_tree = create_node(letter, frequency);
-    enqueue(new_heap, new_tree);
     
-    CU_ASSERT_PTR_NOT_NULL(new_tree);
-    CU_ASSERT_EQUAL('C', get_node_item(new_tree));
+    /*Asserting enqueue()*/
+    BYTE letter = 'Z';
+    short frequency = 17;
+    TREE *node1 = create_node(letter, frequency);
+    enqueue(new_heap, node1);
+    
+    CU_ASSERT_PTR_NOT_NULL(node1);
+    CU_ASSERT_EQUAL('Z', get_node_item(node1));
+    CU_ASSERT_EQUAL(1, new_heap->size);
+
+
+    BYTE letter2 = 'B';
+    short frequency2 = 12;
+    TREE *node2 = create_node(letter2, frequency2);
+    enqueue(new_heap, node2);
+
+
+    /*Testing min_heap propertie.*/
+    BYTE **values = new_heap->data;
+
+    CU_ASSERT_EQUAL(2, new_heap->size);
+    CU_ASSERT_FALSE((values[0]) < (values[new_heap->size - 1]));
+
+    min_heapify(new_heap, 0);
+    *values = new_heap->data;
+
+    CU_ASSERT(values[0] < values[new_heap->size - 1]);
+
+    dequeue(new_heap);
+
     CU_ASSERT_EQUAL(1, new_heap->size);
 
     dequeue(new_heap);
 
-    CU_ASSERT_NOT_EQUAL(1, new_heap);
+    CU_ASSERT_EQUAL(0, new_heap->size);
 
 }
 
 int main(){  
-    if (CUE_SUCCESS != CU_initialize_registry())
-      return CU_get_error();
+    CU_initialize_registry();
 
     CU_pSuite suite = NULL;
     

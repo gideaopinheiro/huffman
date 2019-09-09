@@ -61,19 +61,6 @@ void print_pre_order(TREE *tree){
 	return;
 }
 
-BYTE mount_char(BYTE binary[])
-{
-	BYTE item = 0;
-	for (int i = 0; binary[i] != '\0'; i++)
-	{
-		if (binary[i] == '1')
-		{
-			item = set_bit(item, 7-i);
-		}
-	}
-	return item;
-}
-
 int len_file(FILE *file){
 	fseek(file, 0, SEEK_END);
 	int len = ftell(file);

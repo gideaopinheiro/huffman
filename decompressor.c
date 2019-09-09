@@ -3,8 +3,8 @@
 
 int *getHeader(FILE *input_file)
 {
-	int *header = (int *)malloc(2*sizeof(int));
-	unsigned char header_info, temp;
+	int *header = malloc(2*sizeof(int));
+	BYTE header_info, temp;
 
 	int trash_size = 0, tree_size = 0;
 	fscanf(input_file, "%c", &header_info);

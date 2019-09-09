@@ -168,15 +168,15 @@ int main(void)
 	PQ *queue = create_pq();
 
 	FILE *f = fopen("result.csv", "w");
-	fprintf(f, "%s", "Index;Linked List;Heap\n");
+	fprintf(f, "%s", "Index,Linked List,Heap\n");
 	int comparisons;
 
 	for (int i = 1;i <= n;i++)
 	{
 		x = rand();
-		fprintf(f, "%d;", i);
+		fprintf(f, "%d,", i);
 		comparisons = enqueue_pq(queue, x);
-		fprintf(f, "%d;", comparisons);
+		fprintf(f, "%d,", comparisons);
 		comparisons = enqueue_heap(heap, x);
 		fprintf(f, "%d\n", comparisons);
 	}

@@ -1,7 +1,7 @@
 import pandas as pd 
 import matplotlib.pyplot as plt 
 
-data = pd.read_csv("result.csv", sep=";")
+data = pd.read_csv("result.csv", sep=",")
 
 x = data["Index"]
 pqueue = data["Linked List"]

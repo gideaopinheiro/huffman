@@ -80,7 +80,7 @@ int len_file(FILE *file){
 	rewind(file);
 	return len;
 }
-
+/*
 void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name[], int trash_size)
 {
 	FILE *output_file = fopen(output_file_name, "wb");
@@ -138,8 +138,66 @@ void write_decompress_binary(TREE *tree, FILE *input_file, char output_file_name
 	}
 
 	fclose(output_file);
-}
+}*/
 
+void write_decompress_binary(TREE *root, FILE *input_file, char output_file_name[], int trash_size)
+{
+	FILE *output_file = fopen(output_file_name, "wb");
+	BYTE element, element2;
+
+	TREE *tree = root;
+	int i = -1;
+	fscanf(input_file, "%c", &element2);
+	while (True)
+	{
+		if (i < 0){
+			i = 7;
+			element = element2;
+			if(fscanf(input_file, "%c", &element2) == EOF) break;
+		}
+		
+		while (tree->left != NULL)
+		{
+			if (is_bit_i_set(element,i))
+			{
+				tree = tree->right;
+			}
+			else
+			{
+			 	tree = tree->left;
+			}
+			i--;
+			if (i < 0) break;
+		}
+		if (tree->left == NULL)
+		{
+			fprintf(output_file, "%c", get_node_item(tree));
+			tree = root;
+		}
+	}
+
+	while (i - trash_size  >= 0)
+	{
+		while (tree->left != NULL)
+		{
+			if (is_bit_i_set(element,i))
+			{
+				tree = tree->right;
+			}
+			else
+			{
+			 	tree = tree->left;
+			}
+			i--;
+			if (i < 0) break;
+		}
+
+		fprintf(output_file, "%c", get_node_item(tree));
+		tree = root;
+	}
+
+	fclose(output_file);
+}
 
 void decompress_file(FILE *input_file)
 {

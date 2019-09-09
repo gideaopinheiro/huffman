@@ -1,0 +1,9 @@
+setwd("~/Área de Trabalho/HUFFMAN/huffman")
+library(readr)
+dataset <- read_csv("result.csv")
+
+library(ggplot2)
+
+ggplot(data = dataset) +
+  geom_line(aes(x = dataset$Index, y = dataset$`Linked List`, colour='a')) + 
+  geom_line(aes(x = dataset$Index, y = dataset$Heap, colour='b'))
